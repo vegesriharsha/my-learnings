@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Claude AI Journey</title>
+    <style>
+body {
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        line-height: 1.6;
+        color: #2c3e50;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+    
+    .presentation-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .slide {
+        background: white;
+        border-radius: 15px;
+        padding: 40px;
+        margin-bottom: 30px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        transform: translateY(20px);
+        opacity: 0;
+        animation: slideIn 0.8s ease-out forwards;
+    }
+    
+    @keyframes slideIn {
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    .slide:nth-child(1) { animation-delay: 0.1s; }
+    .slide:nth-child(2) { animation-delay: 0.2s; }
+    .slide:nth-child(3) { animation-delay: 0.3s; }
+    .slide:nth-child(4) { animation-delay: 0.4s; }
+    .slide:nth-child(5) { animation-delay: 0.5s; }
+    .slide:nth-child(6) { animation-delay: 0.6s; }
+    .slide:nth-child(7) { animation-delay: 0.7s; }
+    
+    .slide-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 3px solid #667eea;
+    }
+    
+    .phase-number {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        font-weight: bold;
+        margin-right: 20px;
+        flex-shrink: 0;
+    }
+    
+    .slide-title {
+        font-size: 2.2em;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0;
+    }
+    
+    .slide-subtitle {
+        font-size: 1.1em;
+        color: #7f8c8d;
+        margin-top: 8px;
+    }
+    
+    .section {
+        margin-bottom: 25px;
+    }
+    
+    .section h3 {
+        color: #667eea;
+        font-size: 1.3em;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .section h3::before {
+        content: "▶";
+        margin-right: 10px;
+        color: #764ba2;
+    }
+    
+    .experience-point {
+        background: #f8f9fa;
+        border-left: 4px solid #667eea;
+        padding: 15px 20px;
+        margin: 12px 0;
+        border-radius: 0 8px 8px 0;
+    }
+    
+    .challenge {
+        background: #fff5f5;
+        border-left: 4px solid #e74c3c;
+        padding: 15px 20px;
+        margin: 12px 0;
+        border-radius: 0 8px 8px 0;
+    }
+    
+    .insight {
+        background: #f0fff4;
+        border-left: 4px solid #27ae60;
+        padding: 15px 20px;
+        margin: 12px 0;
+        border-radius: 0 8px 8px 0;
+        font-style: italic;
+    }
+    
+    .insight::before {
+        content: "💡 ";
+        margin-right: 8px;
+    }
+    
+    .title-slide {
+        text-align: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 60px 40px;
+    }
+    
+    .title-slide h1 {
+        font-size: 3.5em;
+        margin-bottom: 20px;
+        font-weight: 300;
+    }
+    
+    .title-slide p {
+        font-size: 1.4em;
+        opacity: 0.9;
+    }
+    
+    .current-setup {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .current-setup h2 {
+        color: white;
+    }
+    
+    .current-setup .section h3 {
+        color: #f1c40f;
+    }
+    
+    .current-setup .experience-point {
+        background: rgba(255,255,255,0.1);
+        border-left-color: #f1c40f;
+        color: white;
+    }
+    
+    .workflow-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-top: 20px;
+    }
+    
+    .workflow-card {
+        background: rgba(255,255,255,0.1);
+        padding: 20px;
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .workflow-card h4 {
+        color: #f1c40f;
+        margin-bottom: 10px;
+        font-size: 1.2em;
+    }
+    
+    @media (max-width: 768px) {
+        .presentation-container {
+            padding: 10px;
+        }
+        
+        .slide {
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        
+        .slide-title {
+            font-size: 1.8em;
+        }
+        
+        .phase-number {
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+        }
+        
+        .workflow-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .title-slide h1 {
+            font-size: 2.5em;
+        }
+    }
+	</style>
+	</head>
+<body>
+    <div class="presentation-container">
+        <!-- Title Slide -->
+        <div class="slide title-slide">
+            <h1>My Claude AI Journey</h1>
+            <p>Personal Experience & Lessons Learned</p>
+            <p style="margin-top: 20px; font-size: 1.1em; opacity: 0.8;">From Basic Chat to Integrated Development Workflow</p>
+        </div>
+		<!-- Phase 1 -->
+    <div class="slide">
+        <div class="slide-header">
+            <div class="phase-number">1</div>
+            <div>
+                <h2 class="slide-title">Starting Simple</h2>
+                <p class="slide-subtitle">Claude Web App & Browser Chat</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>My Experience</h3>
+            <div class="experience-point">
+                <strong>What I was doing:</strong> Using Claude like a smart Stack Overflow - asking coding questions and copying the generated code into my projects
+            </div>
+            <div class="experience-point">
+                <strong>Workflow:</strong> Fresh conversation → Explain context → Get code → Copy/paste → Repeat
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Friction Points I Hit</h3>
+            <div class="challenge">
+                <strong>Token limits:</strong> Long conversations would suddenly lose context mid-discussion
+            </div>
+            <div class="challenge">
+                <strong>No memory:</strong> Every new chat meant re-explaining my entire project setup
+            </div>
+            <div class="challenge">
+                <strong>Manual workflow:</strong> Constant copy/paste was tedious and error-prone
+            </div>
+        </div>
+
+        <div class="insight">
+            Claude's code quality was impressive, but the workflow felt like using a brilliant consultant who forgot everything between meetings
+        </div>
+    </div>
+
+    <!-- Phase 2 -->
+    <div class="slide">
+        <div class="slide-header">
+            <div class="phase-number">2</div>
+            <div>
+                <h2 class="slide-title">Getting Organized</h2>
+                <p class="slide-subtitle">Claude Projects Feature</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>What Changed</h3>
+            <div class="experience-point">
+                <strong>Project-based organization:</strong> Created dedicated spaces for different codebases
+            </div>
+            <div class="experience-point">
+                <strong>Knowledge base:</strong> Added GitHub links and documentation that persisted across conversations
+            </div>
+            <div class="experience-point">
+                <strong>Context sharing:</strong> No more re-explaining project basics in every chat
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>The Good</h3>
+            <div class="experience-point">
+                Much better conversation continuity - Claude remembered my project structure and preferences
+            </div>
+            <div class="experience-point">
+                Organized approach made it easier to return to previous discussions
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Still Frustrating</h3>
+            <div class="challenge">
+                Still copy/pasting everything - the fundamental workflow bottleneck remained
+            </div>
+        </div>
+
+        <div class="insight">
+            Projects solved the memory problem but I was still essentially using Claude as a very organized notepad
+        </div>
+    </div>
+
+    <!-- Phase 3 -->
+    <div class="slide">
+        <div class="slide-header">
+            <div class="phase-number">3</div>
+            <div>
+                <h2 class="slide-title">The False Start</h2>
+                <p class="slide-subtitle">Early Claude Code CLI Attempt</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>What I Tried</h3>
+            <div class="experience-point">
+                Heard about Claude Code CLI and got excited about direct file integration
+            </div>
+            <div class="experience-point">
+                Attempted Windows setup through WSL (Windows Subsystem for Linux)
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Reality Check</h3>
+            <div class="challenge">
+                <strong>Windows complexity:</strong> Only worked through WSL, not native Windows
+            </div>
+            <div class="challenge">
+                <strong>Setup friction:</strong> Needed npm, complex configuration, unclear documentation
+            </div>
+            <div class="challenge">
+                <strong>File mounting confusion:</strong> Couldn't figure out how to properly connect my project files
+            </div>
+            <div class="challenge">
+                <strong>Early-stage tool:</strong> Too many rough edges for daily use
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>My Decision</h3>
+            <div class="experience-point">
+                Abandoned after a few frustrating hours - the setup complexity wasn't worth it
+            </div>
+        </div>
+
+        <div class="insight">
+            Right concept, wrong timing - the tool wasn't mature enough for my Windows development environment
+        </div>
+    </div>
+
+    <!-- Phase 4 -->
+    <div class="slide">
+        <div class="slide-header">
+            <div class="phase-number">4</div>
+            <div>
+                <h2 class="slide-title">The Breakthrough</h2>
+                <p class="slide-subtitle">Claude Desktop + MCP Servers</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>My Setup</h3>
+            <div class="experience-point">
+                <strong>File System MCP:</strong> Claude could directly read and write my project files
+            </div>
+            <div class="experience-point">
+                <strong>GitHub MCP:</strong> Integrated version control operations
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Game Changer Moments</h3>
+            <div class="experience-point">
+                <strong>First direct file edit:</strong> Watching Claude modify my actual code files was magical
+            </div>
+            <div class="experience-point">
+                <strong>No more copy/paste:</strong> Could ask for changes and see them applied immediately
+            </div>
+            <div class="experience-point">
+                <strong>Live codebase access:</strong> Claude could see my entire project structure and make informed decisions
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Remaining Challenge</h3>
+            <div class="challenge">
+                Knowledge was still split between my actual code repo and Claude Projects - had to manage context in two places
+            </div>
+        </div>
+
+        <div class="insight">
+            This was the moment I realized AI could be a true development partner, not just a code generator
+        </div>
+    </div>
+
+    <!-- Phase 5 -->
+    <div class="slide current-setup">
+        <div class="slide-header">
+            <div class="phase-number">5</div>
+            <div>
+                <h2 class="slide-title">The Sweet Spot</h2>
+                <p class="slide-subtitle">Claude Code Plugin in IntelliJ</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>Why This Works So Well</h3>
+            <div class="experience-point">
+                <strong>Native IDE integration:</strong> Claude lives right in my development environment
+            </div>
+            <div class="experience-point">
+                <strong>Full project awareness:</strong> Understands my entire codebase structure and patterns
+            </div>
+            <div class="experience-point">
+                <strong>Knowledge base in code:</strong> `.claude/` folder with markdown files containing standards, context, and requirements
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>My Current Workflow</h3>
+            <div class="workflow-grid">
+                <div class="workflow-card">
+                    <h4>Claude Desktop</h4>
+                    <p>• Project planning & strategy</p>
+                    <p>• Requirements refinement</p>
+                    <p>• Architecture discussions</p>
+                    <p>• Development roadmaps</p>
+                </div>
+                <div class="workflow-card">
+                    <h4>IntelliJ Plugin</h4>
+                    <p>• Actual code generation</p>
+                    <p>• Feature implementation</p>
+                    <p>• Code refactoring</p>
+                    <p>• Bug fixes & debugging</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="experience-point">
+            <strong>The magic:</strong> Claude generates code that follows my existing patterns, coding standards, and project conventions automatically
+        </div>
+    </div>
+
+    <!-- Lessons Learned -->
+    <div class="slide">
+        <div class="slide-header">
+            <div class="phase-number">💡</div>
+            <div>
+                <h2 class="slide-title">Key Lessons Learned</h2>
+                <p class="slide-subtitle">What I Discovered Along the Way</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>Tool Specialization Works Better</h3>
+            <div class="experience-point">
+                Different Claude interfaces excel at different tasks - don't try to force one tool to do everything
+            </div>
+            <div class="experience-point">
+                Planning and implementation benefit from different environments and contexts
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Context is Everything</h3>
+            <div class="experience-point">
+                Well-documented standards and requirements in the `.claude/` folder make a huge difference
+            </div>
+            <div class="experience-point">
+                AI works best when it understands not just what you want, but how you want it done
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Iterative Approach Wins</h3>
+            <div class="experience-point">
+                Breaking features into smaller chunks produces better results than asking for complete implementations
+            </div>
+            <div class="experience-point">
+                Building on existing code patterns works better than starting from scratch
+            </div>
+        </div>
+
+        <div class="insight">
+            The goal shifted from "getting code from AI" to "collaborating with AI" - and that made all the difference
+        </div>
+    </div>
+
+    <!-- Closing -->
+    <div class="slide">
+        <div class="slide-header">
+            <div class="phase-number">🎯</div>
+            <div>
+                <h2 class="slide-title">Where I Am Now</h2>
+                <p class="slide-subtitle">Current State & Reflections</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>My Current Reality</h3>
+            <div class="experience-point">
+                AI assistance has become a natural part of my development process, not a separate step
+            </div>
+            <div class="experience-point">
+                I spend more time thinking about architecture and less time writing boilerplate
+            </div>
+            <div class="experience-point">
+                Code quality and consistency have improved because AI follows documented standards
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>What Surprised Me Most</h3>
+            <div class="experience-point">
+                The biggest barrier wasn't AI capability - it was workflow integration
+            </div>
+            <div class="experience-point">
+                Having AI understand my existing codebase was more valuable than generating new code
+            </div>
+            <div class="experience-point">
+                The learning curve was more about finding the right tools than learning to prompt effectively
+            </div>
+        </div>
+
+        <div class="insight">
+            This journey taught me that adopting AI for development is less about the technology and more about evolving your workflow to make the most of it
+        </div>
+
+        <div style="text-align: center; margin-top: 40px; padding-top: 30px; border-top: 2px solid #ecf0f1; color: #7f8c8d; font-style: italic;">
+            Thanks for listening to my AI development journey - happy to discuss any specific aspects!
+        </div>
+    </div>
+</div>
+</body>
+</html>
