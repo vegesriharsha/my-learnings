@@ -1,0 +1,109 @@
+# Site settings
+title: Professional Tech Blog
+email: contact@professionaltechblog.com
+description: >-
+  Expert insights on enterprise technology solutions, cloud architecture, 
+  AI infrastructure, and digital transformation strategies for modern organizations.
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "https://yourusername.github.io" # the base hostname & protocol for your site
+twitter_username: your_twitter
+github_username: your_github
+linkedin_username: your_linkedin
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+theme: minima
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# Collections
+collections:
+  posts:
+    output: true
+    permalink: /:categories/:year/:month/:day/:title/
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+      author: "Professional Tech Blog"
+      show_excerpts: true
+
+# SEO and social
+author:
+  name: Professional Tech Blog
+  email: contact@professionaltechblog.com
+  twitter: your_twitter
+
+social:
+  name: Professional Tech Blog
+  links:
+    - https://twitter.com/your_twitter
+    - https://github.com/your_github
+    - https://linkedin.com/in/your_linkedin
+
+# Google Analytics
+google_analytics: UA-NNNNNNNN-N
+
+# Disqus Comments
+disqus:
+  shortname: your-disqus-shortname
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+  - README.md
+  - LICENSE.md
+
+# Include in processing
+include:
+  - _pages
+
+# Pagination
+paginate: 10
+paginate_path: "/page:num/"
+
+# Reading time
+reading_time: true
+
+# Archive settings
+archive:
+  type: yearly
+  path: /archive/
+  layout: archive
+
+# Tag settings
+tag_page_layout: tag_page
+tag_page_dir: tag
+tag_permalink_style: pretty
+
+# Category settings
+category_page_layout: category_page
+category_page_dir: category
+category_permalink_style: pretty
+
+# Compression
+compress_html:
+  clippings: all
+  comments: all
+  endings: all
+  startings: []
+  blanklines: false
+  profile: false
+
+# Sass
+sass:
+  style: compressed
+  sass_dir: _sass

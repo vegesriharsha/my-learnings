@@ -1,0 +1,3540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenShift AI Implementation Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+    <style>
+        :root {
+            --primary-color: #003366;
+            --secondary-color: #0066cc;
+            --accent-color: #4a90a4;
+            --gold-accent: #d4af37;
+            --text-primary: #2c3e50;
+            --text-secondary: #5a6c7d;
+            --text-light: #7b8794;
+            --background: #ffffff;
+            --surface: #f7f9fc;
+            --surface-alt: #ecf0f3;
+            --border: #d6dce5;
+            --border-light: #e8edf3;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --error: #e74c3c;
+            --shadow: 0 4px 6px rgba(0,0,0,0.07);
+            --shadow-lg: 0 8px 25px rgba(0,0,0,0.1);
+            --border-radius: 6px;
+            --border-radius-lg: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.65;
+            color: var(--text-primary);
+            background: var(--background);
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #004080 100%);
+            color: white;
+            padding: 3rem 0 2.5rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-lg);
+            border-bottom: 3px solid var(--gold-accent);
+        }
+
+        .header h1 {
+            font-family: 'Merriweather', serif;
+            font-size: 2.75rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.02em;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.92;
+            font-weight: 300;
+            max-width: 800px;
+        }
+
+        /* Navigation */
+        .nav {
+            background: white;
+            padding: 1rem 0;
+            border-bottom: 2px solid var(--border-light);
+            position: sticky;
+            top: 142px;
+            z-index: 99;
+            box-shadow: var(--shadow);
+        }
+
+        .nav-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-toggle {
+            display: none;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-toggle:hover {
+            background: var(--secondary-color);
+        }
+
+        .nav-toggle-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+        }
+
+        .nav-toggle-icon span {
+            display: block;
+            height: 2px;
+            width: 100%;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .nav-toggle.active .nav-toggle-icon span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .nav-toggle.active .nav-toggle-icon span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .nav-toggle.active .nav-toggle-icon span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
+
+        .nav-items {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: var(--border-radius);
+            padding: 0.6rem 1.2rem;
+            text-decoration: none;
+            color: var(--text-primary);
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-item:hover {
+            background: var(--surface);
+            border-color: var(--accent-color);
+            color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .nav-item.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow);
+        }
+
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 6px solid var(--gold-accent);
+        }
+
+        .nav-item-icon {
+            font-size: 1rem;
+        }
+
+        /* Dropdown Navigation for smaller screens */
+        .nav-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--border-light);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-lg);
+            max-height: 70vh;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            margin-top: 0.5rem;
+        }
+
+        .nav-dropdown.active {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .nav-dropdown .nav-item {
+            display: flex;
+            width: 100%;
+            border: none;
+            border-bottom: 1px solid var(--border-light);
+            border-radius: 0;
+            padding: 1rem 1.5rem;
+            margin: 0;
+            justify-content: flex-start;
+        }
+
+        .nav-dropdown .nav-item:last-child {
+            border-bottom: none;
+            border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+        }
+
+        .nav-dropdown .nav-item:first-child {
+            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+        }
+
+        .nav-dropdown .nav-item:hover {
+            background: var(--surface);
+            transform: none;
+        }
+
+        .nav-dropdown .nav-item.active::after {
+            display: none;
+        }
+
+        /* Breadcrumb Navigation */
+        .nav-breadcrumb {
+            background: var(--surface-alt);
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-light);
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .breadcrumb-item {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .breadcrumb-item:hover {
+            color: var(--primary-color);
+        }
+
+        .breadcrumb-item.active {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .breadcrumb-separator {
+            color: var(--text-light);
+        }
+
+        /* Progress Indicator */
+        .nav-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: var(--gold-accent);
+            transition: width 0.3s ease;
+            border-radius: 0 2px 2px 0;
+        }
+
+        /* Responsive Navigation */
+        @media (max-width: 1200px) {
+            .nav-items {
+                max-width: calc(100vw - 200px);
+                overflow-x: auto;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+            }
+            
+            .nav-items::-webkit-scrollbar {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-toggle {
+                display: flex;
+            }
+
+            .nav-items {
+                display: none;
+            }
+
+            .nav-items.mobile-hidden {
+                display: none;
+            }
+
+            .nav-container {
+                justify-content: space-between;
+            }
+
+            .nav-item {
+                font-size: 0.85rem;
+                padding: 0.5rem 1rem;
+            }
+        }
+
+        /* Main Content */
+        .main {
+            padding: 2rem 0;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            font-family: 'Merriweather', serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: var(--primary-color);
+            border-bottom: 4px solid var(--gold-accent);
+            padding-bottom: 0.75rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: var(--accent-color);
+        }
+
+        .subsection {
+            margin-bottom: 3rem;
+        }
+
+        .subsection h3 {
+            font-family: 'Merriweather', serif;
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            color: var(--secondary-color);
+            position: relative;
+            padding-left: 1rem;
+        }
+
+        .subsection h3::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.5rem;
+            width: 4px;
+            height: 1.5rem;
+            background: var(--gold-accent);
+            border-radius: 2px;
+        }
+
+        .subsection h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border: 1px solid var(--border-light);
+            border-radius: var(--border-radius-lg);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+            border-left-color: var(--gold-accent);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.25rem;
+            box-shadow: var(--shadow);
+        }
+
+        /* Interactive Tables */
+        .table-container {
+            background: white;
+            border-radius: var(--border-radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            margin: 2rem 0;
+            border: 1px solid var(--border-light);
+        }
+
+        .table-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.25rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            letter-spacing: 0.02em;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 1.25rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+            vertical-align: top;
+        }
+
+        .table th {
+            background: var(--surface);
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .table tr:hover {
+            background: var(--surface);
+        }
+
+        .table tbody tr:nth-child(even) {
+            background: var(--surface-alt);
+        }
+
+        .table tbody tr:nth-child(even):hover {
+            background: var(--surface);
+        }
+
+        .table-search {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .table-search input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: var(--border-radius);
+            font-size: 0.95rem;
+            background: var(--surface);
+            transition: border-color 0.2s ease;
+        }
+
+        .table-search input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            background: white;
+        }
+
+        /* Code Blocks */
+        .code-container {
+            background: #2d3748;
+            border-radius: var(--border-radius);
+            margin: 1.5rem 0;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .code-header {
+            background: #1a202c;
+            color: white;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .copy-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: opacity 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            opacity: 0.8;
+        }
+
+        pre[class*="language-"] {
+            margin: 0;
+            padding: 1.5rem;
+            background: #2d3748 !important;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.4rem 0.9rem;
+            border-radius: var(--border-radius);
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: var(--shadow);
+        }
+
+        .badge-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .badge-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .badge-info {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        /* Benefits Grid */
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .benefit-card {
+            background: white;
+            border: 1px solid var(--border-light);
+            border-radius: var(--border-radius-lg);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            border-top: 4px solid var(--accent-color);
+        }
+
+        .benefit-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+            border-top-color: var(--gold-accent);
+        }
+
+        .benefit-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: var(--border-radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: white;
+            font-size: 1.75rem;
+            box-shadow: var(--shadow);
+        }
+
+        /* Architecture Diagram */
+        .architecture-diagram {
+            background: white;
+            border: 1px solid var(--border-light);
+            border-radius: var(--border-radius-lg);
+            padding: 3rem;
+            margin: 3rem 0;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .layer {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: var(--border-radius-lg);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .layer:hover {
+            transform: translateX(8px);
+            border-color: var(--accent-color);
+            box-shadow: var(--shadow);
+        }
+
+        .layer-title {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .layer-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .layer-item {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius);
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+        }
+
+        .layer-item:hover {
+            background: var(--gold-accent);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Search functionality */
+        .search-container {
+            background: white;
+            border: 1px solid var(--border-light);
+            border-radius: var(--border-radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 3rem;
+            box-shadow: var(--shadow-lg);
+            border-left: 4px solid var(--gold-accent);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1.25rem;
+            border: 2px solid var(--border);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            background: var(--surface);
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(74, 144, 164, 0.1);
+        }
+
+        .search-results {
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .search-result {
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .search-result:hover {
+            background: var(--surface);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header {
+                padding: 2rem 0;
+            }
+
+            .header h1 {
+                font-size: 2.2rem;
+            }
+
+            .nav {
+                top: 120px;
+            }
+
+            .nav-container {
+                gap: 0.25rem;
+            }
+
+            .nav-item {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .benefits-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .table-container {
+                overflow-x: auto;
+            }
+
+            .layer-content {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .architecture-diagram {
+                padding: 2rem;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Progress Indicators */
+        .progress-bar {
+            background: var(--border);
+            border-radius: 10px;
+            height: 8px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        /* Tooltips */
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            background: #333;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            z-index: 1000;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <h1>OpenShift AI Implementation Guide</h1>
+            <p>Technical Documentation for Enterprise AI Infrastructure Teams</p>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="container">
+            <div class="nav-container">
+                <button class="nav-toggle" id="navToggle">
+                    <div class="nav-toggle-icon">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <span>Menu</span>
+                </button>
+                
+                <div class="nav-items" id="navItems">
+                    <a href="#" class="nav-item active" data-section="overview">
+                        <span class="nav-item-icon">📋</span>Overview
+                    </a>
+                    <a href="#" class="nav-item" data-section="fundamentals">
+                        <span class="nav-item-icon">🏗️</span>OpenShift Fundamentals
+                    </a>
+                    <a href="#" class="nav-item" data-section="development">
+                        <span class="nav-item-icon">💻</span>Development Environment
+                    </a>
+                    <a href="#" class="nav-item" data-section="ollama">
+                        <span class="nav-item-icon">🧠</span>Ollama Setup
+                    </a>
+                    <a href="#" class="nav-item" data-section="webui">
+                        <span class="nav-item-icon">🌐</span>Web Interface
+                    </a>
+                    <a href="#" class="nav-item" data-section="lifecycle">
+                        <span class="nav-item-icon">♻️</span>Container Lifecycle
+                    </a>
+                    <a href="#" class="nav-item" data-section="gpu">
+                        <span class="nav-item-icon">⚡</span>GPU Management
+                    </a>
+                    <a href="#" class="nav-item" data-section="networking">
+                        <span class="nav-item-icon">🌍</span>Networking
+                    </a>
+                    <a href="#" class="nav-item" data-section="storage">
+                        <span class="nav-item-icon">💾</span>Storage
+                    </a>
+                    <a href="#" class="nav-item" data-section="security">
+                        <span class="nav-item-icon">🔒</span>Security
+                    </a>
+                    <a href="#" class="nav-item" data-section="monitoring">
+                        <span class="nav-item-icon">📊</span>Monitoring
+                    </a>
+                    <a href="#" class="nav-item" data-section="cicd">
+                        <span class="nav-item-icon">🚀</span>CI/CD Pipeline
+                    </a>
+                    <a href="#" class="nav-item" data-section="troubleshooting">
+                        <span class="nav-item-icon">🔧</span>Troubleshooting
+                    </a>
+                </div>
+
+                <!-- Dropdown for mobile/small screens -->
+                <div class="nav-dropdown" id="navDropdown">
+                    <a href="#" class="nav-item" data-section="overview">
+                        <span class="nav-item-icon">📋</span>Overview
+                    </a>
+                    <a href="#" class="nav-item" data-section="fundamentals">
+                        <span class="nav-item-icon">🏗️</span>OpenShift Fundamentals
+                    </a>
+                    <a href="#" class="nav-item" data-section="development">
+                        <span class="nav-item-icon">💻</span>Development Environment
+                    </a>
+                    <a href="#" class="nav-item" data-section="ollama">
+                        <span class="nav-item-icon">🧠</span>Ollama Setup
+                    </a>
+                    <a href="#" class="nav-item" data-section="webui">
+                        <span class="nav-item-icon">🌐</span>Web Interface
+                    </a>
+                    <a href="#" class="nav-item" data-section="lifecycle">
+                        <span class="nav-item-icon">♻️</span>Container Lifecycle
+                    </a>
+                    <a href="#" class="nav-item" data-section="gpu">
+                        <span class="nav-item-icon">⚡</span>GPU Management
+                    </a>
+                    <a href="#" class="nav-item" data-section="networking">
+                        <span class="nav-item-icon">🌍</span>Networking
+                    </a>
+                    <a href="#" class="nav-item" data-section="storage">
+                        <span class="nav-item-icon">💾</span>Storage
+                    </a>
+                    <a href="#" class="nav-item" data-section="security">
+                        <span class="nav-item-icon">🔒</span>Security
+                    </a>
+                    <a href="#" class="nav-item" data-section="monitoring">
+                        <span class="nav-item-icon">📊</span>Monitoring
+                    </a>
+                    <a href="#" class="nav-item" data-section="cicd">
+                        <span class="nav-item-icon">🚀</span>CI/CD Pipeline
+                    </a>
+                    <a href="#" class="nav-item" data-section="troubleshooting">
+                        <span class="nav-item-icon">🔧</span>Troubleshooting
+                    </a>
+                </div>
+
+                <div class="nav-progress" id="navProgress"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Breadcrumb Navigation -->
+    <div class="nav-breadcrumb">
+        <div class="container">
+            <div class="breadcrumb-container" id="breadcrumb">
+                <a href="#" class="breadcrumb-item" data-section="overview">Home</a>
+                <span class="breadcrumb-separator">›</span>
+                <span class="breadcrumb-item active" id="currentSection">Overview</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search -->
+    <div class="container">
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Search the documentation..." id="searchInput">
+            <div class="search-results" id="searchResults"></div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- Overview Section -->
+            <section id="overview" class="section active">
+                <h2 class="section-title">Executive Summary & Technology Overview</h2>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">🎯</div>
+                        <h3>Enterprise AI Infrastructure Goals</h3>
+                    </div>
+                    <div class="benefits-grid">
+                        <div class="benefit-card">
+                            <div class="benefit-icon">🏢</div>
+                            <h4>On-Premises Control</h4>
+                            <p>Keep sensitive data and AI processing within corporate boundaries for maximum security and compliance.</p>
+                        </div>
+                        <div class="benefit-card">
+                            <div class="benefit-icon">💰</div>
+                            <h4>Cost Optimization</h4>
+                            <p>Eliminate per-token charges while maximizing hardware utilization across your organization.</p>
+                        </div>
+                        <div class="benefit-card">
+                            <div class="benefit-icon">🚀</div>
+                            <h4>Developer Productivity</h4>
+                            <p>Provide powerful AI tools through centralized, web-based interfaces accessible from anywhere.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Technology Architecture Decision Matrix</h3>
+                    <div class="table-container">
+                        <div class="table-header">Technology Selection Rationale</div>
+                        <div class="table-search">
+                            <input type="text" placeholder="Filter technologies..." onkeyup="filterTable(this, 'tech-matrix')">
+                        </div>
+                        <table class="table" id="tech-matrix">
+                            <thead>
+                                <tr>
+                                    <th>Requirement</th>
+                                    <th>Technology Choice</th>
+                                    <th>Alternative Considered</th>
+                                    <th>Why We Chose This</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="badge badge-info">Platform</span>Container Platform</td>
+                                    <td><strong>OpenShift</strong></td>
+                                    <td>Kubernetes, Docker Swarm</td>
+                                    <td>Enterprise features, GPU scheduling, security</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge badge-success">AI</span>AI Inference Engine</td>
+                                    <td><strong>Ollama</strong></td>
+                                    <td>LocalAI, vLLM, TGI</td>
+                                    <td>OpenAI API compatibility, ease of use, performance</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge badge-warning">UI</span>User Interface</td>
+                                    <td><strong>Open WebUI</strong></td>
+                                    <td>LM Studio, Custom UI</td>
+                                    <td>Web-based, multi-user, ChatGPT-like experience</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge badge-info">Dev</span>Development Environment</td>
+                                    <td><strong>JupyterHub + VS Code Server</strong></td>
+                                    <td>Local development</td>
+                                    <td>Centralized resources, consistent environments</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge badge-success">Protocol</span>Model Context Protocol</td>
+                                    <td><strong>MCP Bridge</strong></td>
+                                    <td>Native implementations</td>
+                                    <td>On-premises compatibility, extensibility</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Implementation Benefits</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                        <div class="card">
+                            <h4>👨‍💻 For Developers</h4>
+                            <ul style="margin-left: 1rem;">
+                                <li>Zero Setup Time</li>
+                                <li>Consistent Environment</li>
+                                <li>Shared Resources</li>
+                                <li>Easy Collaboration</li>
+                            </ul>
+                        </div>
+                        <div class="card">
+                            <h4>⚙️ For Operations Teams</h4>
+                            <ul style="margin-left: 1rem;">
+                                <li>Centralized Management</li>
+                                <li>Resource Optimization</li>
+                                <li>Security Controls</li>
+                                <li>Easy Scalability</li>
+                            </ul>
+                        </div>
+                        <div class="card">
+                            <h4>🏢 For Organization</h4>
+                            <ul style="margin-left: 1rem;">
+                                <li>Cost Control</li>
+                                <li>Data Security</li>
+                                <li>Compliance</li>
+                                <li>Innovation</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Architecture Section -->
+            <section id="architecture" class="section">
+                <h2 class="section-title">Architecture Overview</h2>
+                
+                <div class="architecture-diagram">
+                    <h3 style="margin-bottom: 2rem;">Enterprise AI Infrastructure Architecture</h3>
+                    
+                    <div class="layer">
+                        <div class="layer-title">User Access Layer</div>
+                        <div class="layer-content">
+                            <div class="layer-item">Web Browser</div>
+                            <div class="layer-item">Mobile App</div>
+                            <div class="layer-item">API Clients</div>
+                            <div class="layer-item">IDE Extensions</div>
+                        </div>
+                    </div>
+                    
+                    <div class="layer">
+                        <div class="layer-title">Application Layer</div>
+                        <div class="layer-content">
+                            <div class="layer-item">Open WebUI</div>
+                            <div class="layer-item">JupyterHub</div>
+                            <div class="layer-item">VS Code Server</div>
+                            <div class="layer-item">Custom Applications</div>
+                        </div>
+                    </div>
+                    
+                    <div class="layer">
+                        <div class="layer-title">Service Layer</div>
+                        <div class="layer-content">
+                            <div class="layer-item">Ollama Services</div>
+                            <div class="layer-item">MCP Bridge</div>
+                            <div class="layer-item">Model Registry</div>
+                            <div class="layer-item">Analytics</div>
+                        </div>
+                    </div>
+                    
+                    <div class="layer">
+                        <div class="layer-title">OpenShift Platform</div>
+                        <div class="layer-content">
+                            <div class="layer-item">Container Orchestration</div>
+                            <div class="layer-item">GPU Scheduling</div>
+                            <div class="layer-item">Service Mesh</div>
+                        </div>
+                    </div>
+                    
+                    <div class="layer">
+                        <div class="layer-title">Infrastructure Layer</div>
+                        <div class="layer-content">
+                            <div class="layer-item">NVIDIA GPU Cluster</div>
+                            <div class="layer-item">High-Speed Storage</div>
+                            <div class="layer-item">Enterprise Network</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Traditional vs Centralized Approach</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 2rem 0;">
+                        <div class="card">
+                            <h4 style="color: var(--error);">❌ Traditional Approach</h4>
+                            <ul style="margin-left: 1rem;">
+                                <li>Expensive local GPU hardware</li>
+                                <li>64GB+ RAM requirements</li>
+                                <li>Individual model downloads</li>
+                                <li>Complex environment setup</li>
+                                <li>Isolated work environments</li>
+                            </ul>
+                        </div>
+                        <div class="card">
+                            <h4 style="color: var(--success);">✅ Centralized Approach</h4>
+                            <ul style="margin-left: 1rem;">
+                                <li>Any device, anywhere access</li>
+                                <li>Consistent environments</li>
+                                <li>Shared resources</li>
+                                <li>Zero setup time</li>
+                                <li>Easy collaboration</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Components Section -->
+            <section id="components" class="section">
+                <h2 class="section-title">Core Technology Components</h2>
+                
+                <div class="subsection">
+                    <h3>OpenShift Container Platform</h3>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">🏗️</div>
+                            <div>
+                                <h4>Enterprise Kubernetes Distribution</h4>
+                                <p>Red Hat's enterprise platform with GPU scheduling and multi-tenancy</p>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                            <div style="background: var(--surface); padding: 1rem; border-radius: var(--border-radius);">
+                                <strong>GPU Management</strong><br>
+                                Intelligent scheduling and allocation
+                            </div>
+                            <div style="background: var(--surface); padding: 1rem; border-radius: var(--border-radius);">
+                                <strong>Multi-Tenancy</strong><br>
+                                Secure isolation between teams
+                            </div>
+                            <div style="background: var(--surface); padding: 1rem; border-radius: var(--border-radius);">
+                                <strong>Security</strong><br>
+                                Built-in RBAC and policies
+                            </div>
+                            <div style="background: var(--surface); padding: 1rem; border-radius: var(--border-radius);">
+                                <strong>Operations</strong><br>
+                                Monitoring and troubleshooting
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Ollama Inference Engine</h3>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">🧠</div>
+                            <div>
+                                <h4>Lightweight AI Model Server</h4>
+                                <p>Docker-native tool with OpenAI-compatible APIs</p>
+                            </div>
+                        </div>
+                        
+                        <div class="table-container">
+                            <div class="table-header">Ollama vs Alternatives Comparison</div>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Feature</th>
+                                        <th>Ollama</th>
+                                        <th>LocalAI</th>
+                                        <th>vLLM/TGI</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Performance Optimization</td>
+                                        <td><span class="badge badge-success">Excellent</span></td>
+                                        <td><span class="badge badge-warning">Good</span></td>
+                                        <td><span class="badge badge-success">Excellent</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Model Management</td>
+                                        <td><span class="badge badge-success">Simple</span></td>
+                                        <td><span class="badge badge-warning">Complex</span></td>
+                                        <td><span class="badge badge-warning">Complex</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Enterprise Deployment</td>
+                                        <td><span class="badge badge-success">Easy</span></td>
+                                        <td><span class="badge badge-warning">Moderate</span></td>
+                                        <td><span class="badge badge-warning">Difficult</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Resource Utilization</td>
+                                        <td><span class="badge badge-success">Optimized</span></td>
+                                        <td><span class="badge badge-warning">Good</span></td>
+                                        <td><span class="badge badge-success">Optimized</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="subsection">
+                            <h4>Supported Models</h4>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                <div class="card">
+                                    <strong>Code Generation</strong>
+                                    <div style="margin-top: 0.5rem;">
+                                        <span class="badge badge-info">CodeLlama 7B</span>
+                                        <span class="badge badge-info">CodeLlama 13B</span>
+                                        <span class="badge badge-info">CodeLlama 34B</span>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <strong>General Purpose</strong>
+                                    <div style="margin-top: 0.5rem;">
+                                        <span class="badge badge-success">Llama 3.2</span>
+                                        <span class="badge badge-success">Mistral</span>
+                                        <span class="badge badge-success">Qwen</span>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <strong>Specialized</strong>
+                                    <div style="margin-top: 0.5rem;">
+                                        <span class="badge badge-warning">Phi-3</span>
+                                        <span class="badge badge-warning">Gemma</span>
+                                        <span class="badge badge-warning">DeepSeek-Coder</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Open WebUI Interface</h3>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">💻</div>
+                            <div>
+                                <h4>Enterprise Web Interface</h4>
+                                <p>ChatGPT-like experience with enterprise features</p>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                            <div style="background: var(--surface); padding: 1rem; border-radius: var(--border-radius);">
+                                <strong>✅ vs LM Studio</strong><br>
+                                • Web-based (no desktop app)<br>
+                                • Multi-user support<br>
+                                • Enterprise SSO integration
+                            </div>
+                            <div style="background: var(--surface); padding: 1rem; border-radius: var(--border-radius);">
+                                <strong>✅ vs Custom Development</strong><br>
+                                • Proven, battle-tested<br>
+                                • Active community<br>
+                                • Faster time-to-market
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Implementation Section -->
+            <section id="implementation" class="section">
+                <h2 class="section-title">Implementation Guide</h2>
+                
+                <div class="subsection">
+                    <h3>Step 1: OpenShift Project Setup</h3>
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>Bash - Create AI Projects</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre><code class="language-bash"># Create AI-specific projects
+oc new-project ai-development
+oc new-project ai-staging  
+oc new-project ai-production
+
+# Set resource quotas for AI workloads
+oc create quota ai-compute-quota \
+  --hard=requests.nvidia.com/gpu=4,limits.nvidia.com/gpu=4,requests.memory=32Gi \
+  -n ai-development</code></pre>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Step 2: Ollama Deployment</h3>
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>YAML - Ollama Deployment Configuration</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama-service
+  namespace: ai-production
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ollama
+  template:
+    spec:
+      containers:
+      - name: ollama
+        image: ollama/ollama:latest
+        resources:
+          requests:
+            nvidia.com/gpu: 1
+            memory: 8Gi
+            cpu: 2
+          limits:
+            nvidia.com/gpu: 1
+            memory: 16Gi
+            cpu: 4
+        env:
+        - name: OLLAMA_HOST
+          value: "0.0.0.0:11434"
+        - name: OLLAMA_MODELS
+          value: "/models"
+        ports:
+        - containerPort: 11434
+          name: http
+        volumeMounts:
+        - name: models-storage
+          mountPath: /models</code></pre>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Step 3: Open WebUI Setup</h3>
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>YAML - WebUI Deployment</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: open-webui
+  namespace: ai-production
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: open-webui
+  template:
+    spec:
+      containers:
+      - name: open-webui
+        image: ghcr.io/open-webui/open-webui:main
+        env:
+        - name: OLLAMA_BASE_URL
+          value: "http://ollama-service:11434"
+        - name: WEBUI_AUTH
+          value: "True"
+        - name: WEBUI_NAME
+          value: "Enterprise AI Assistant"
+        ports:
+        - containerPort: 8080
+          name: http</code></pre>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Step 4: Model Preloading</h3>
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>Bash - Model Management Script</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre><code class="language-bash">#!/bin/bash
+# Model Management Utility
+
+NAMESPACE="ai-production"
+
+function add_model() {
+    local model_name=$1
+    echo "Adding model: $model_name"
+    oc exec -n $NAMESPACE deployment/ollama-service -- ollama pull $model_name
+}
+
+function list_models() {
+    echo "=== Available Models ==="
+    oc exec -n $NAMESPACE deployment/ollama-service -- ollama list
+}
+
+function test_model() {
+    local model_name=${1:-"codellama:7b"}
+    echo "Testing model: $model_name"
+    oc exec -n $NAMESPACE deployment/ollama-service -- \
+        curl -X POST http://localhost:11434/api/generate \
+        -H "Content-Type: application/json" \
+        -d "{\"model\":\"$model_name\",\"prompt\":\"Write a hello world function\",\"stream\":false}"
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Implementation Progress Tracker</h3>
+                    <div class="card">
+                        <div style="margin-bottom: 1rem;">
+                            <strong>Project Setup</strong>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <strong>Storage Configuration</strong>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 75%"></div>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <strong>Ollama Deployment</strong>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 50%"></div>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <strong>WebUI Setup</strong>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 25%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Management Section -->
+            <section id="management" class="section">
+                <h2 class="section-title">GPU Resource & Model Management</h2>
+                
+                <div class="subsection">
+                    <h3>GPU Node Configuration</h3>
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>Bash - GPU Node Setup</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre><code class="language-bash"># Label GPU nodes
+oc label node gpu-node-01 node-role.kubernetes.io/gpu=true
+oc label node gpu-node-01 gpu.nvidia.com/class=A100
+
+# Taint GPU nodes to ensure only GPU workloads are scheduled
+oc adm taint node gpu-node-01 nvidia.com/gpu=true:NoSchedule</code></pre>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Resource Quotas</h3>
+                    <div class="table-container">
+                        <div class="table-header">Environment Resource Allocation</div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Environment</th>
+                                    <th>GPU Limit</th>
+                                    <th>Memory Limit</th>
+                                    <th>CPU Limit</th>
+                                    <th>Storage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="badge badge-info">Development</span></td>
+                                    <td>4 GPUs</td>
+                                    <td>128Gi</td>
+                                    <td>32 cores</td>
+                                    <td>1Ti</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge badge-warning">Staging</span></td>
+                                    <td>6 GPUs</td>
+                                    <td>192Gi</td>
+                                    <td>48 cores</td>
+                                    <td>2Ti</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge badge-success">Production</span></td>
+                                    <td>16 GPUs</td>
+                                    <td>512Gi</td>
+                                    <td>128 cores</td>
+                                    <td>10Ti</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Auto-scaling Configuration</h3>
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>YAML - Horizontal Pod Autoscaler</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre><code class="language-yaml">apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ollama-hpa
+  namespace: ai-production
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ollama-service
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80</code></pre>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Model Versioning Strategy</h3>
+                    <div class="card">
+                        <h4>Version Naming Convention</h4>
+                        <div style="background: var(--surface); padding: 1rem; border-radius: var(--border-radius); margin: 1rem 0;">
+                            <code>{model-name}:{size}-{version}-{variant}</code>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <div style="background: #e8f5e8; padding: 1rem; border-radius: var(--border-radius);">
+                                <strong>Examples:</strong><br>
+                                <code>codellama:7b-v1.0-base</code><br>
+                                <code>codellama:7b-v1.1-finetuned</code><br>
+                                <code>mistral:7b-v1.0-instruct</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Security Section -->
+            <section id="security" class="section">
+                <h2 class="section-title">Security & Access Control</h2>
+                
+                <div class="subsection">
+                    <h3>RBAC Configuration</h3>
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>YAML - Service Account and Roles</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre><code class="language-yaml">apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ai-service-account
+  namespace: ai-production
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ai-operator
+  namespace: ai-production
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "configmaps", "secrets"]
+  verbs: ["get", "list", "watch", "create", "update", "patch"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "replicasets"]
+  verbs: ["get", "list", "watch", "create", "update", "patch"]</code></pre>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Network Security</h3>
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>YAML - Network Policy</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre><code class="language-yaml">apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ai-production-isolation
+  namespace: ai-production
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow traffic from ai-staging for testing
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ai-staging
+  # Allow internal communication
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ai-production</code></pre>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Security Checklist</h3>
+                    <div class="card">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+                            <div>
+                                <h4>✅ Container Security</h4>
+                                <ul style="margin-left: 1rem;">
+                                    <li>Non-root containers</li>
+                                    <li>Read-only root filesystem</li>
+                                    <li>Capability dropping</li>
+                                    <li>Security context constraints</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4>✅ Network Security</h4>
+                                <ul style="margin-left: 1rem;">
+                                    <li>Network policies</li>
+                                    <li>TLS encryption</li>
+                                    <li>Service mesh (optional)</li>
+                                    <li>Ingress controls</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4>✅ Access Control</h4>
+                                <ul style="margin-left: 1rem;">
+                                    <li>RBAC policies</li>
+                                    <li>Service accounts</li>
+                                    <li>Pod security standards</li>
+                                    <li>Admission controllers</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Monitoring Section -->
+            <section id="monitoring" class="section">
+                <h2 class="section-title">Monitoring & Observability</h2>
+                
+                <div class="subsection">
+                    <h3>Prometheus Metrics Configuration</h3>
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>YAML - ServiceMonitor for Ollama</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre><code class="language-yaml">apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: ollama-metrics
+  namespace: ai-production
+spec:
+  selector:
+    matchLabels:
+      app: ollama
+  endpoints:
+  - port: metrics
+    interval: 30s
+    path: /metrics</code></pre>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Key Metrics Dashboard</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                        <div class="card">
+                            <h4>🎯 GPU Utilization</h4>
+                            <div style="font-size: 2rem; color: var(--success); margin: 0.5rem 0;">85%</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h4>⚡ Inference Rate</h4>
+                            <div style="font-size: 2rem; color: var(--accent-color); margin: 0.5rem 0;">45.2</div>
+                            <p>tokens/second</p>
+                        </div>
+                        <div class="card">
+                            <h4>💾 Memory Usage</h4>
+                            <div style="font-size: 2rem; color: var(--warning); margin: 0.5rem 0;">12.4GB</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 62%"></div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h4>🔄 Active Models</h4>
+                            <div style="font-size: 2rem; color: var(--primary-color); margin: 0.5rem 0;">3</div>
+                            <p>models loaded</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Alert Configuration</h3>
+                    <div class="table-container">
+                        <div class="table-header">Monitoring Alerts</div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Alert</th>
+                                    <th>Condition</th>
+                                    <th>Severity</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>High GPU Utilization</td>
+                                    <td>GPU > 95% for 5min</td>
+                                    <td><span class="badge badge-warning">Warning</span></td>
+                                    <td>Scale up replicas</td>
+                                </tr>
+                                <tr>
+                                    <td>Model Inference Failure</td>
+                                    <td>Error rate > 5%</td>
+                                    <td><span class="badge" style="background: var(--error); color: white;">Critical</span></td>
+                                    <td>Restart pods</td>
+                                </tr>
+                                <tr>
+                                    <td>Storage Space Low</td>
+                                    <td>Disk usage > 80%</td>
+                                    <td><span class="badge badge-warning">Warning</span></td>
+                                    <td>Clean old models</td>
+                                </tr>
+                                <tr>
+                                    <td>Pod Memory Usage</td>
+                                    <td>Memory > 90%</td>
+                                    <td><span class="badge badge-info">Info</span></td>
+                                    <td>Monitor closely</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Troubleshooting Section -->
+            <section id="troubleshooting" class="section">
+                <h2 class="section-title">Troubleshooting & Operations</h2>
+                
+                <div class="subsection">
+                    <h3>Common Issues and Solutions</h3>
+                    <div class="table-container">
+                        <div class="table-header">Troubleshooting Guide</div>
+                        <div class="table-search">
+                            <input type="text" placeholder="Search issues..." onkeyup="filterTable(this, 'troubleshooting-table')">
+                        </div>
+                        <table class="table" id="troubleshooting-table">
+                            <thead>
+                                <tr>
+                                    <th>Issue</th>
+                                    <th>Symptoms</th>
+                                    <th>Possible Causes</th>
+                                    <th>Resolution</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="badge" style="background: var(--error); color: white;">GPU</span> Pod not scheduling</td>
+                                    <td>Pod pending, GPU not allocated</td>
+                                    <td>GPU nodes unavailable, quota exceeded</td>
+                                    <td>Check node labels, verify quotas</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge badge-warning">Model</span> Slow inference</td>
+                                    <td>High response times, timeouts</td>
+                                    <td>Model too large, insufficient GPU memory</td>
+                                    <td>Use smaller model, increase resources</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge badge-info">Connection</span> API errors</td>
+                                    <td>Connection refused, 500 errors</td>
+                                    <td>Service down, network issues</td>
+                                    <td>Check pod status, verify routes</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge badge-warning">Storage</span> Models not loading</td>
+                                    <td>Model pull fails, disk errors</td>
+                                    <td>Storage full, permission issues</td>
+                                    <td>Clean up space, check PVC status</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Diagnostic Commands</h3>
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>Bash - GPU Troubleshooting Script</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre><code class="language-bash">#!/bin/bash
+# GPU Troubleshooting Script
+
+echo "=== GPU Node Status ==="
+oc get nodes -l node-role.kubernetes.io/gpu=true -o wide
+
+echo "=== GPU Resource Allocation ==="
+oc describe nodes -l node-role.kubernetes.io/gpu=true | grep -A 10 "Allocated resources"
+
+echo "=== GPU Pod Status ==="
+oc get pods -A -o wide | grep nvidia.com/gpu
+
+echo "=== Checking for GPU Scheduling Issues ==="
+oc get events -A --field-selector reason=FailedScheduling | grep -i gpu</code></pre>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Maintenance Scripts</h3>
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>Bash - Automated Maintenance</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                        </div>
+                        <pre><code class="language-bash">#!/bin/bash
+# AI Infrastructure Maintenance Script
+
+echo "=== AI Infrastructure Maintenance Started at $(date) ==="
+
+# Pre-maintenance backup
+echo "1. Creating pre-maintenance backup..."
+./backup-models.sh
+
+# Scale down non-critical services
+echo "2. Scaling down development environments..."
+oc scale deployment --all --replicas=0 -n ai-development
+
+# Update container images
+echo "3. Updating container images..."
+oc patch deployment ollama-service -n ai-production -p \
+  '{"spec":{"template":{"spec":{"containers":[{"name":"ollama","image":"ollama/ollama:latest"}]}}}}'
+
+# Wait for rollout
+echo "4. Waiting for deployment rollout..."
+oc rollout status deployment/ollama-service -n ai-production --timeout=600s
+
+echo "=== Maintenance Completed at $(date) ==="</code></pre>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Backup and Disaster Recovery</h3>
+                    <div class="card">
+                        <h4>Automated Backup Scripts</h4>
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span>Bash - Model Backup and Restore</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code class="language-bash">#!/bin/bash
+# AI Infrastructure Backup Script
+
+set -e
+
+BACKUP_DATE=$(date +%Y%m%d_%H%M%S)
+BACKUP_PATH="/backups/ai-models-$BACKUP_DATE"
+
+echo "Starting AI model backup to $BACKUP_PATH"
+
+# Backup model files
+oc exec -n ai-production deployment/ollama-service -- \
+  tar czf - /models | \
+  tar xzf - -C $BACKUP_PATH/models/
+
+# Backup configurations
+oc get configmaps -n ai-production -o yaml > $BACKUP_PATH/configmaps.yaml
+oc get secrets -n ai-production -o yaml > $BACKUP_PATH/secrets.yaml
+oc get pvc -n ai-production -o yaml > $BACKUP_PATH/pvcs.yaml
+
+echo "Backup completed: $BACKUP_PATH"</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h4>Maintenance Automation</h4>
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span>Bash - Scheduled Maintenance Script</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code class="language-bash">#!/bin/bash
+# AI Infrastructure Maintenance Script
+
+set -e
+
+MAINTENANCE_DATE=$(date +%Y%m%d_%H%M%S)
+LOG_FILE="/var/log/ai-maintenance-$MAINTENANCE_DATE.log"
+
+exec > >(tee -a $LOG_FILE)
+exec 2>&1
+
+echo "=== AI Infrastructure Maintenance Started at $(date) ==="
+
+# Pre-maintenance backup
+echo "1. Creating pre-maintenance backup..."
+./backup-models.sh
+
+# Scale down non-critical services
+echo "2. Scaling down development environments..."
+oc scale deployment --all --replicas=0 -n ai-development
+oc scale deployment --all --replicas=0 -n ai-staging
+
+# Update container images
+echo "3. Updating container images..."
+oc patch deployment ollama-service -n ai-production -p \
+  '{"spec":{"template":{"spec":{"containers":[{"name":"ollama","image":"ollama/ollama:latest"}]}}}}'
+
+# Wait for rollout
+echo "4. Waiting for deployment rollout..."
+oc rollout status deployment/ollama-service -n ai-production --timeout=600s
+
+# Run health checks
+echo "5. Running post-maintenance health checks..."
+for svc in $(oc get svc -n ai-production -o name); do
+    echo "Testing $svc..."
+    oc exec -n ai-production deployment/ollama-service -- \
+      curl -f http://${svc#service/}:11434/api/tags
+done
+
+# Scale back up
+echo "6. Scaling back up non-production environments..."
+oc scale deployment --all --replicas=1 -n ai-development
+oc scale deployment --all --replicas=2 -n ai-staging
+
+echo "=== AI Infrastructure Maintenance Completed at $(date) ==="</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Performance Optimization Checklist</h3>
+                    <div class="card">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                            <div>
+                                <h4>🔧 GPU Optimization</h4>
+                                <ul style="margin-left: 1rem;">
+                                    <li class="tooltip" data-tooltip="Should be >70% for cost efficiency">Monitor GPU utilization</li>
+                                    <li class="tooltip" data-tooltip="Use nvidia-smi to check">Check for memory leaks</li>
+                                    <li class="tooltip" data-tooltip="Balance workload across GPUs">Optimize scheduling</li>
+                                    <li class="tooltip" data-tooltip="Use appropriate model sizes">Right-size models</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4>⚡ Performance Tuning</h4>
+                                <ul style="margin-left: 1rem;">
+                                    <li class="tooltip" data-tooltip="Configure OLLAMA_NUM_PARALLEL">Parallel processing</li>
+                                    <li class="tooltip" data-tooltip="Set OLLAMA_KEEP_ALIVE">Model keep-alive</li>
+                                    <li class="tooltip" data-tooltip="Preload frequently used models">Model preloading</li>
+                                    <li class="tooltip" data-tooltip="Use VPA recommendations">Resource optimization</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4>📊 Monitoring</h4>
+                                <ul style="margin-left: 1rem;">
+                                    <li class="tooltip" data-tooltip="Track response times">Response metrics</li>
+                                    <li class="tooltip" data-tooltip="Monitor error rates">Error tracking</li>
+                                    <li class="tooltip" data-tooltip="Set up alerting">Alert configuration</li>
+                                    <li class="tooltip" data-tooltip="Regular health checks">Health monitoring</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h4>Model Performance Optimization</h4>
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span>YAML - Performance Configuration</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code class="language-yaml">apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ollama-performance-config
+  namespace: ai-production
+data:
+  performance-settings.env: |
+    # Ollama Performance Settings
+    OLLAMA_NUM_PARALLEL=4
+    OLLAMA_MAX_LOADED_MODELS=3
+    OLLAMA_MAX_QUEUE=512
+    OLLAMA_KEEP_ALIVE=24h
+    
+    # GPU Memory Management
+    OLLAMA_GPU_MEMORY_FRACTION=0.9
+    OLLAMA_FLASH_ATTENTION=true
+    
+    # Model Loading Optimization
+    OLLAMA_PRELOAD_MODELS=codellama:7b,mistral:7b
+    OLLAMA_MODEL_CACHE_SIZE=8Gi</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- OpenShift Fundamentals Section -->
+            <section id="fundamentals" class="section">
+                <h2 class="section-title">OpenShift Fundamentals for AI Workloads</h2>
+                
+                <div class="subsection">
+                    <h3>Core OpenShift Concepts</h3>
+                    <div class="card">
+                        <h4>Projects (Namespaces)</h4>
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span>Bash - Create AI-specific projects</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code class="language-bash"># Create AI-specific projects
+oc new-project ai-development
+oc new-project ai-staging  
+oc new-project ai-production
+
+# Set resource quotas for AI workloads
+oc create quota ai-compute-quota \
+  --hard=requests.nvidia.com/gpu=4,limits.nvidia.com/gpu=4,requests.memory=32Gi \
+  -n ai-development</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h4>AI Model Deployment Example</h4>
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span>YAML - Complete Ollama Deployment</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama-codellama
+  namespace: ai-production
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ollama-codellama
+  template:
+    metadata:
+      labels:
+        app: ollama-codellama
+        model: codellama-13b
+        tier: inference
+    spec:
+      containers:
+      - name: ollama
+        image: ollama/ollama:latest
+        resources:
+          requests:
+            nvidia.com/gpu: 1
+            memory: 8Gi
+            cpu: 2
+          limits:
+            nvidia.com/gpu: 1
+            memory: 16Gi
+            cpu: 4
+        env:
+        - name: OLLAMA_HOST
+          value: "0.0.0.0:11434"
+        - name: OLLAMA_MODELS
+          value: "/models"
+        ports:
+        - containerPort: 11434
+          name: api
+        volumeMounts:
+        - name: model-storage
+          mountPath: /models
+        - name: tmp-storage
+          mountPath: /tmp
+        readinessProbe:
+          httpGet:
+            path: /api/tags
+            port: 11434
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /api/tags
+            port: 11434
+          initialDelaySeconds: 60
+          periodSeconds: 30
+      volumes:
+      - name: model-storage
+        persistentVolumeClaim:
+          claimName: ollama-models-pvc
+      - name: tmp-storage
+        emptyDir:
+          sizeLimit: 4Gi
+      nodeSelector:
+        node-role.kubernetes.io/gpu: "true"
+      tolerations:
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="subsection">
+                        <h3>OpenShift-Specific Features for AI</h3>
+                        <div class="card">
+                            <h4>Routes vs Services vs Ingress</h4>
+                            <div class="code-container">
+                                <div class="code-header">
+                                    <span>YAML - Service and Route Configuration</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code class="language-yaml"># Service for internal communication
+apiVersion: v1
+kind: Service
+metadata:
+  name: ollama-service
+  namespace: ai-production
+spec:
+  selector:
+    app: ollama-codellama
+  ports:
+  - name: api
+    port: 11434
+    targetPort: 11434
+  type: ClusterIP
+
+---
+# Route for external access
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: ollama-external
+  namespace: ai-production
+spec:
+  to:
+    kind: Service
+    name: ollama-service
+  port:
+    targetPort: api
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <h4>BuildConfigs for Custom AI Images</h4>
+                            <div class="code-container">
+                                <div class="code-header">
+                                    <span>YAML - Custom Image Build</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code class="language-yaml">apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: custom-ollama-build
+  namespace: ai-development
+spec:
+  source:
+    type: Git
+    git:
+      uri: https://github.com/your-org/custom-ollama
+      ref: main
+    contextDir: /
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: Dockerfile
+  output:
+    to:
+      kind: ImageStreamTag
+      name: custom-ollama:latest
+  triggers:
+  - type: ConfigChange
+  - type: GitHub
+    github:
+      secret: github-webhook-secret</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Development Environment Section -->
+            <section id="development" class="section">
+                <h2 class="section-title">Centralized Development Environment Setup</h2>
+                
+                <div class="subsection">
+                    <h3>Multi-User Development Architecture</h3>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">🏗️</div>
+                            <div>
+                                <h4>Centralized Development Strategy</h4>
+                                <p>Eliminates need for powerful local machines by providing shared GPU resources</p>
+                            </div>
+                        </div>
+
+                        <div class="architecture-diagram">
+                            <h4 style="margin-bottom: 2rem;">Development Environment Architecture</h4>
+                            
+                            <div class="layer">
+                                <div class="layer-title">Developer Access Layer</div>
+                                <div class="layer-content">
+                                    <div class="layer-item">Web Browser</div>
+                                    <div class="layer-item">VS Code Remote</div>
+                                    <div class="layer-item">Jupyter Hub</div>
+                                    <div class="layer-item">SSH/Terminal</div>
+                                </div>
+                            </div>
+                            
+                            <div class="layer">
+                                <div class="layer-title">Development Namespace</div>
+                                <div class="layer-content">
+                                    <div class="layer-item">Personal Pods</div>
+                                    <div class="layer-item">Shared Services</div>
+                                    <div class="layer-item">Model Repository</div>
+                                </div>
+                            </div>
+                            
+                            <div class="layer">
+                                <div class="layer-title">Shared GPU Pool (OpenShift Nodes)</div>
+                                <div class="layer-content">
+                                    <div class="layer-item">NVIDIA A100 GPUs</div>
+                                    <div class="layer-item">Shared Storage</div>
+                                    <div class="layer-item">Network Resources</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h4>Development Namespace Template</h4>
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span>YAML - Developer Workspace Template</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code class="language-yaml">apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: developer-workspace-template
+  namespace: ai-development
+parameters:
+- name: DEVELOPER_NAME
+  description: Developer username
+  required: true
+- name: GPU_QUOTA
+  description: GPU quota for developer
+  value: "1"
+- name: MEMORY_QUOTA
+  description: Memory quota
+  value: "16Gi"
+objects:
+# Personal namespace for developer
+- apiVersion: v1
+  kind: Namespace
+  metadata:
+    name: dev-${DEVELOPER_NAME}
+    labels:
+      type: developer-workspace
+      owner: ${DEVELOPER_NAME}
+
+# Resource quota for developer
+- apiVersion: v1
+  kind: ResourceQuota
+  metadata:
+    name: ${DEVELOPER_NAME}-quota
+    namespace: dev-${DEVELOPER_NAME}
+  spec:
+    hard:
+      requests.nvidia.com/gpu: ${GPU_QUOTA}
+      limits.nvidia.com/gpu: ${GPU_QUOTA}
+      requests.memory: ${MEMORY_QUOTA}
+      limits.memory: ${MEMORY_QUOTA}
+      requests.cpu: "4"
+      limits.cpu: "8"
+      persistentvolumeclaims: "5"
+
+# Personal development pod
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: ${DEVELOPER_NAME}-workspace
+    namespace: dev-${DEVELOPER_NAME}
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: developer-workspace
+        owner: ${DEVELOPER_NAME}
+    template:
+      metadata:
+        labels:
+          app: developer-workspace
+          owner: ${DEVELOPER_NAME}
+      spec:
+        containers:
+        - name: workspace
+          image: your-registry.com/dev-workspace:latest
+          resources:
+            requests:
+              nvidia.com/gpu: 1
+              memory: 8Gi
+              cpu: 2
+            limits:
+              nvidia.com/gpu: 1
+              memory: 16Gi
+              cpu: 4
+          ports:
+          - containerPort: 8080
+            name: jupyter
+          - containerPort: 8443
+            name: vscode
+          - containerPort: 22
+            name: ssh
+          env:
+          - name: DEVELOPER_NAME
+            value: ${DEVELOPER_NAME}
+          - name: JUPYTER_ENABLE_LAB
+            value: "yes"
+          - name: GRANT_SUDO
+            value: "yes"
+          volumeMounts:
+          - name: workspace-storage
+            mountPath: /home/jovyan
+          - name: shared-models
+            mountPath: /models
+            readOnly: true
+          - name: shared-datasets
+            mountPath: /datasets
+            readOnly: true
+        volumes:
+        - name: workspace-storage
+          persistentVolumeClaim:
+            claimName: ${DEVELOPER_NAME}-workspace-pvc
+        - name: shared-models
+          persistentVolumeClaim:
+            claimName: shared-models-pvc
+        - name: shared-datasets
+          persistentVolumeClaim:
+            claimName: shared-datasets-pvc</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="subsection">
+                        <h3>Shared Development Services</h3>
+                        <div class="card">
+                            <h4>JupyterHub Multi-User Setup</h4>
+                            <div class="code-container">
+                                <div class="code-header">
+                                    <span>YAML - JupyterHub Configuration</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jupyterhub
+  namespace: ai-development
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jupyterhub
+  template:
+    metadata:
+      labels:
+        app: jupyterhub
+    spec:
+      serviceAccountName: jupyterhub
+      containers:
+      - name: jupyterhub
+        image: jupyterhub/k8s-hub:3.2.1
+        resources:
+          requests:
+            memory: 1Gi
+            cpu: 0.5
+          limits:
+            memory: 2Gi
+            cpu: 1
+        env:
+        - name: CONFIGPROXY_AUTH_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: jupyterhub-config
+              key: proxy-token
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - name: config
+          mountPath: /etc/jupyterhub
+        - name: shared-models
+          mountPath: /shared/models
+      volumes:
+      - name: config
+        configMap:
+          name: jupyterhub-config
+      - name: shared-models
+        persistentVolumeClaim:
+          claimName: shared-models-pvc</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ollama Setup Section -->
+            <section id="ollama" class="section">
+                <h2 class="section-title">Ollama Installation and Configuration</h2>
+                
+                <div class="subsection">
+                    <h3>Ollama Base Deployment</h3>
+                    <div class="card">
+                        <h4>Step-by-Step Ollama Setup</h4>
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span>Bash - Ollama Setup Script for OpenShift</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code class="language-bash">#!/bin/bash
+# Ollama Setup Script for OpenShift
+
+set -e
+
+NAMESPACE="ai-production"
+MODELS_STORAGE_SIZE="500Gi"
+TEMP_STORAGE_SIZE="50Gi"
+
+echo "=== Setting up Ollama on OpenShift ==="
+
+# Create namespace
+oc new-project $NAMESPACE || oc project $NAMESPACE
+
+# Create storage for models
+cat << EOF | oc apply -f -
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ollama-models-pvc
+  namespace: $NAMESPACE
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: $MODELS_STORAGE_SIZE
+  storageClassName: ai-model-storage
+EOF
+
+echo "Storage created successfully"</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h4>Production Ollama Deployment</h4>
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span>YAML - Production Deployment Configuration</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama-service
+  namespace: ai-production
+  labels:
+    app: ollama
+    component: inference-engine
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: ollama
+  template:
+    metadata:
+      labels:
+        app: ollama
+        component: inference-engine
+    spec:
+      containers:
+      - name: ollama
+        image: ollama/ollama:latest
+        resources:
+          requests:
+            nvidia.com/gpu: 1
+            memory: 8Gi
+            cpu: 2
+          limits:
+            nvidia.com/gpu: 1
+            memory: 16Gi
+            cpu: 4
+        env:
+        - name: OLLAMA_HOST
+          value: "0.0.0.0:11434"
+        - name: OLLAMA_ORIGINS
+          value: "*"
+        - name: OLLAMA_MODELS
+          value: "/models"
+        - name: OLLAMA_KEEP_ALIVE
+          value: "24h"
+        ports:
+        - containerPort: 11434
+          name: http
+        volumeMounts:
+        - name: models-storage
+          mountPath: /models
+        readinessProbe:
+          httpGet:
+            path: /api/tags
+            port: 11434
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /api/tags
+            port: 11434
+          initialDelaySeconds: 60
+          periodSeconds: 30
+      volumes:
+      - name: models-storage
+        persistentVolumeClaim:
+          claimName: ollama-models-pvc
+      nodeSelector:
+        node-role.kubernetes.io/gpu: "true"</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="subsection">
+                        <h3>Model Management</h3>
+                        <div class="card">
+                            <h4>Model Preloading Job</h4>
+                            <div class="code-container">
+                                <div class="code-header">
+                                    <span>YAML - Model Initialization Job</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code class="language-yaml">apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ollama-model-init
+  namespace: ai-production
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: model-loader
+        image: ollama/ollama:latest
+        command:
+        - /bin/bash
+        - -c
+        - |
+          ollama serve &
+          sleep 15
+          ollama pull codellama:7b
+          ollama pull codellama:13b
+          ollama pull mistral:7b
+          ollama list
+          pkill ollama
+        volumeMounts:
+        - name: model-storage
+          mountPath: /root/.ollama
+        resources:
+          requests:
+            nvidia.com/gpu: 1
+            memory: 8Gi
+          limits:
+            nvidia.com/gpu: 1
+            memory: 16Gi
+      volumes:
+      - name: model-storage
+        persistentVolumeClaim:
+          claimName: ollama-models-pvc</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Web Interface Section -->
+            <section id="webui" class="section">
+                <h2 class="section-title">Web Interface Deployment (Open WebUI)</h2>
+                
+                <div class="subsection">
+                    <h3>Open WebUI Installation</h3>
+                    <div class="card">
+                        <h4>Complete WebUI Deployment</h4>
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span>YAML - Open WebUI Production Deployment</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: open-webui
+  namespace: ai-production
+  labels:
+    app: open-webui
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: open-webui
+  template:
+    metadata:
+      labels:
+        app: open-webui
+    spec:
+      containers:
+      - name: open-webui
+        image: ghcr.io/open-webui/open-webui:main
+        resources:
+          requests:
+            memory: 512Mi
+            cpu: 0.5
+          limits:
+            memory: 2Gi
+            cpu: 2
+        env:
+        - name: OLLAMA_BASE_URL
+          value: "http://ollama-service:11434"
+        - name: WEBUI_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: webui-secrets
+              key: secret-key
+        - name: WEBUI_AUTH
+          value: "True"
+        - name: WEBUI_NAME
+          value: "Enterprise AI Assistant"
+        - name: DEFAULT_MODELS
+          value: "codellama:7b,codellama:13b,mistral:7b"
+        ports:
+        - containerPort: 8080
+          name: http
+        volumeMounts:
+        - name: data-storage
+          mountPath: /app/backend/data
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30
+      volumes:
+      - name: data-storage
+        persistentVolumeClaim:
+          claimName: webui-data-pvc</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h4>Service and Route Configuration</h4>
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span>YAML - External Access Configuration</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code class="language-yaml">apiVersion: v1
+kind: Service
+metadata:
+  name: open-webui-service
+  namespace: ai-production
+spec:
+  selector:
+    app: open-webui
+  ports:
+  - port: 8080
+    targetPort: 8080
+    name: http
+
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: ai-chat
+  namespace: ai-production
+spec:
+  host: ai-chat.apps.your-cluster.com
+  to:
+    kind: Service
+    name: open-webui-service
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Container Lifecycle Section -->
+            <section id="lifecycle" class="section">
+                <h2 class="section-title">Container Lifecycle Management</h2>
+                
+                <div class="subsection">
+                    <h3>Environment Management Strategy</h3>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">♻️</div>
+                            <div>
+                                <h4>Multi-Environment Deployment Pipeline</h4>
+                                <p>Systematic approach to promoting AI services across environments</p>
+                            </div>
+                        </div>
+
+                        <div class="table-container">
+                            <div class="table-header">Environment Promotion Strategy</div>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Environment</th>
+                                        <th>Purpose</th>
+                                        <th>Resource Allocation</th>
+                                        <th>Promotion Criteria</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="badge badge-info">Development</span></td>
+                                        <td>Feature development, experimentation</td>
+                                        <td>Limited resources, shared GPUs</td>
+                                        <td>Code review, unit tests pass</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge badge-warning">Staging</span></td>
+                                        <td>Integration testing, validation</td>
+                                        <td>Production-like resources</td>
+                                        <td>Integration tests, performance validation</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge badge-success">Production</span></td>
+                                        <td>Live AI services</td>
+                                        <td>Full resource allocation, HA</td>
+                                        <td>Manual approval, monitoring validation</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- GPU Management Section -->
+            <section id="gpu" class="section">
+                <h2 class="section-title">GPU Resource Management</h2>
+                
+                <div class="subsection">
+                    <h3>GPU Node Configuration</h3>
+                    <div class="card">
+                        <h4>Node Labels and Taints</h4>
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span>Bash - GPU Node Setup</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code class="language-bash"># Label GPU nodes
+oc label node gpu-node-01 node-role.kubernetes.io/gpu=true
+oc label node gpu-node-01 gpu.nvidia.com/class=A100
+
+# Taint GPU nodes to ensure only GPU workloads are scheduled
+oc adm taint node gpu-node-01 nvidia.com/gpu=true:NoSchedule</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h4>Auto-scaling Configuration</h4>
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span>YAML - Horizontal Pod Autoscaler</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code class="language-yaml">apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ollama-hpa
+  namespace: ai-production
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ollama-service
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+    scaleDown:
+      stabilizationWindowSeconds: 600
+      policies:
+      - type: Percent
+        value: 25
+        periodSeconds: 60</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h4>Vertical Pod Autoscaler</h4>
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span>YAML - VPA for Resource Optimization</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code class="language-yaml">apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: ollama-vpa
+  namespace: ai-production
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ollama-service
+  updatePolicy:
+    updateMode: "Auto"
+  resourcePolicy:
+    containerPolicies:
+    - containerName: ollama
+      maxAllowed:
+        memory: 32Gi
+        cpu: 8
+      minAllowed:
+        memory: 8Gi
+        cpu: 2
+      controlledResources: ["memory", "cpu"]</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Networking Section -->
+            <section id="networking" class="section">
+                <h2 class="section-title">Networking and Service Discovery</h2>
+                
+                <div class="subsection">
+                    <h3>Service Mesh Integration</h3>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">🌐</div>
+                            <div>
+                                <h4>AI Service Architecture</h4>
+                                <p>Advanced networking patterns for AI workloads</p>
+                            </div>
+                        </div>
+
+                        <div class="architecture-diagram">
+                            <h4 style="margin-bottom: 2rem;">AI Service Networking Architecture</h4>
+                            
+                            <div class="layer">
+                                <div class="layer-title">External Access Layer</div>
+                                <div class="layer-content">
+                                    <div class="layer-item">OpenShift Routes</div>
+                                    <div class="layer-item">Load Balancers</div>
+                                    <div class="layer-item">TLS Termination</div>
+                                </div>
+                            </div>
+                            
+                            <div class="layer">
+                                <div class="layer-title">Service Mesh Layer</div>
+                                <div class="layer-content">
+                                    <div class="layer-item">Istio/Service Mesh</div>
+                                    <div class="layer-item">Traffic Management</div>
+                                    <div class="layer-item">Security Policies</div>
+                                </div>
+                            </div>
+                            
+                            <div class="layer">
+                                <div class="layer-title">AI Services Layer</div>
+                                <div class="layer-content">
+                                    <div class="layer-item">Ollama API</div>
+                                    <div class="layer-item">Open WebUI</div>
+                                    <div class="layer-item">Model Registry</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Storage Section -->
+            <section id="storage" class="section">
+                <h2 class="section-title">Storage and Persistent Data</h2>
+                
+                <div class="subsection">
+                    <h3>Storage Classes for AI Workloads</h3>
+                    <div class="card">
+                        <h4>High-Performance Storage Configuration</h4>
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span>YAML - AI Storage Classes</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code class="language-yaml">apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: ai-fast-ssd
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "false"
+provisioner: kubernetes.io/csi-driver
+parameters:
+  type: ssd
+  replication-type: none
+  iops: "10000"
+  throughput: "500Mi"
+reclaimPolicy: Retain
+allowVolumeExpansion: true
+volumeBindingMode: WaitForFirstConsumer
+
+---
+# Storage class for model repositories
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: ai-model-storage
+provisioner: kubernetes.io/csi-driver
+parameters:
+  type: ssd
+  replication-type: 3-way
+  compression: "true"
+reclaimPolicy: Retain
+allowVolumeExpansion: true</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h4>Persistent Volume Management</h4>
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span>YAML - Shared Storage Configuration</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code class="language-yaml">apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: shared-models-pvc
+  namespace: ai-production
+spec:
+  accessModes:
+  - ReadWriteMany  # Multiple pods can read the same models
+  resources:
+    requests:
+      storage: 500Gi
+  storageClassName: ai-model-storage
+
+---
+# Shared workspace for development
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: shared-workspace-pvc
+  namespace: ai-development
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: ai-fast-ssd</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CI/CD Pipeline Section -->
+            <section id="cicd" class="section">
+                <h2 class="section-title">CI/CD Pipeline Integration</h2>
+                
+                <div class="subsection">
+                    <h3>Tekton Pipeline for AI Models</h3>
+                    <div class="card">
+                        <h4>Model Build Pipeline</h4>
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span>YAML - AI Model Pipeline</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code class="language-yaml">apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: ai-model-pipeline
+  namespace: ai-development
+spec:
+  params:
+  - name: model-name
+    type: string
+    description: Name of the AI model
+  - name: model-version
+    type: string
+    description: Version of the model
+  - name: git-url
+    type: string
+    description: Git repository URL
+  
+  workspaces:
+  - name: shared-data
+  
+  tasks:
+  - name: fetch-source
+    taskRef:
+      name: git-clone
+    workspaces:
+    - name: output
+      workspace: shared-data
+    params:
+    - name: url
+      value: $(params.git-url)
+  
+  - name: build-model-image
+    taskRef:
+      name: buildah
+    runAfter:
+    - fetch-source
+    workspaces:
+    - name: source
+      workspace: shared-data
+    params:
+    - name: IMAGE
+      value: your-registry.com/ai/$(params.model-name):$(params.model-version)
+  
+  - name: deploy-to-dev
+    taskRef:
+      name: openshift-client
+    runAfter:
+    - build-model-image
+    params:
+    - name: SCRIPT
+      value: |
+        oc process -f k8s/deployment-template.yaml \
+          -p MODEL_NAME=$(params.model-name) \
+          -p MODEL_VERSION=$(params.model-version) \
+          -p ENVIRONMENT=development | oc apply -f -</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h4>GitOps with ArgoCD</h4>
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span>YAML - ArgoCD Application</span>
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                            </div>
+                            <pre><code class="language-yaml">apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ai-production-stack
+  namespace: openshift-gitops
+spec:
+  project: ai-platform
+  source:
+    repoURL: https://github.com/your-org/ai-infrastructure
+    targetRevision: main
+    path: manifests/production
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ai-production
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="subsection">
+                        <h3>Model Versioning and Lifecycle Management</h3>
+                        <div class="card">
+                            <h4>Model Registry Implementation</h4>
+                            <div class="code-container">
+                                <div class="code-header">
+                                    <span>YAML - Model Registry Service</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: model-registry
+  namespace: ai-infrastructure
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: model-registry
+  template:
+    spec:
+      containers:
+      - name: registry
+        image: your-registry.com/model-registry:latest
+        resources:
+          requests:
+            memory: 1Gi
+            cpu: 0.5
+          limits:
+            memory: 4Gi
+            cpu: 2
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: registry-secrets
+              key: database-url
+        - name: STORAGE_BACKEND
+          value: "s3"
+        - name: S3_BUCKET
+          value: "enterprise-ai-models"
+        ports:
+        - containerPort: 8080
+          name: http
+        volumeMounts:
+        - name: model-cache
+          mountPath: /cache
+        - name: config
+          mountPath: /config
+      volumes:
+      - name: model-cache
+        persistentVolumeClaim:
+          claimName: model-cache-pvc
+      - name: config
+        configMap:
+          name: registry-config</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <h4>MCP (Model Context Protocol) Integration</h4>
+                            <div class="code-container">
+                                <div class="code-header">
+                                    <span>YAML - MCP Bridge Service</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                                </div>
+                                <pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-bridge
+  namespace: ai-production
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mcp-bridge
+  template:
+    spec:
+      containers:
+      - name: mcp-bridge
+        image: your-registry.com/mcp-bridge:latest
+        resources:
+          requests:
+            memory: 512Mi
+            cpu: 0.5
+          limits:
+            memory: 2Gi
+            cpu: 2
+        env:
+        - name: OLLAMA_BASE_URL
+          value: "http://ollama-service:11434"
+        - name: MCP_CONFIG_PATH
+          value: "/config/mcp-servers.json"
+        ports:
+        - containerPort: 8080
+          name: http
+        volumeMounts:
+        - name: mcp-config
+          mountPath: /config
+        - name: workspace
+          mountPath: /workspace
+      volumes:
+      - name: mcp-config
+        configMap:
+          name: mcp-server-config
+      - name: workspace
+        persistentVolumeClaim:
+          claimName: shared-workspace-pvc</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script>
+        // Navigation functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const navItems = document.querySelectorAll('.nav-item');
+            const sections = document.querySelectorAll('.section');
+            const navToggle = document.getElementById('navToggle');
+            const navDropdown = document.getElementById('navDropdown');
+            const navProgress = document.getElementById('navProgress');
+            const currentSection = document.getElementById('currentSection');
+
+            // Section mapping for better names
+            const sectionNames = {
+                'overview': 'Overview',
+                'fundamentals': 'OpenShift Fundamentals',
+                'development': 'Development Environment',
+                'ollama': 'Ollama Setup',
+                'webui': 'Web Interface',
+                'lifecycle': 'Container Lifecycle',
+                'gpu': 'GPU Management',
+                'networking': 'Networking',
+                'storage': 'Storage',
+                'security': 'Security',
+                'monitoring': 'Monitoring',
+                'cicd': 'CI/CD Pipeline',
+                'troubleshooting': 'Troubleshooting'
+            };
+
+            // Handle navigation item clicks
+            navItems.forEach((item, index) => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove active class from all nav items and sections
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    sections.forEach(section => section.classList.remove('active'));
+                    
+                    // Add active class to clicked nav item
+                    document.querySelectorAll(`[data-section="${this.dataset.section}"]`).forEach(navItem => {
+                        navItem.classList.add('active');
+                    });
+                    
+                    // Show corresponding section
+                    const targetSection = document.getElementById(this.dataset.section);
+                    if (targetSection) {
+                        targetSection.classList.add('active');
+                        
+                        // Update breadcrumb
+                        currentSection.textContent = sectionNames[this.dataset.section] || this.dataset.section;
+                        
+                        // Update progress bar
+                        const progress = ((index + 1) / navItems.length * 2) * 100; // Divide by 2 because we have duplicate nav items
+                        navProgress.style.width = `${Math.min(progress, 100)}%`;
+                        
+                        // Close dropdown on mobile
+                        navDropdown.classList.remove('active');
+                        navToggle.classList.remove('active');
+                        
+                        // Scroll to top
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                });
+            });
+
+            // Handle mobile menu toggle
+            navToggle.addEventListener('click', function() {
+                this.classList.toggle('active');
+                navDropdown.classList.toggle('active');
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!navToggle.contains(e.target) && !navDropdown.contains(e.target)) {
+                    navDropdown.classList.remove('active');
+                    navToggle.classList.remove('active');
+                }
+            });
+
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    navDropdown.classList.remove('active');
+                    navToggle.classList.remove('active');
+                }
+            });
+
+            // Keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    navDropdown.classList.remove('active');
+                    navToggle.classList.remove('active');
+                }
+            });
+
+            // Auto-hide navigation on scroll (optional)
+            let lastScrollTop = 0;
+            const nav = document.querySelector('.nav');
+            
+            window.addEventListener('scroll', function() {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                
+                // Close dropdown when scrolling
+                if (navDropdown.classList.contains('active')) {
+                    navDropdown.classList.remove('active');
+                    navToggle.classList.remove('active');
+                }
+                
+                lastScrollTop = scrollTop;
+            });
+
+            // Initialize syntax highlighting
+            if (typeof Prism !== 'undefined') {
+                Prism.highlightAll();
+            }
+
+            // Initialize progress bar
+            navProgress.style.width = '7.7%'; // First section (1/13)
+        });
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const searchResults = document.getElementById('searchResults');
+            
+            if (searchTerm.length < 3) {
+                searchResults.style.display = 'none';
+                return;
+            }
+
+            // Simple search implementation
+            const sections = document.querySelectorAll('.section');
+            const results = [];
+
+            sections.forEach(section => {
+                const content = section.textContent.toLowerCase();
+                if (content.includes(searchTerm)) {
+                    const title = section.querySelector('.section-title').textContent;
+                    results.push({
+                        title: title,
+                        section: section.id,
+                        context: content.substring(content.indexOf(searchTerm) - 50, content.indexOf(searchTerm) + 100)
+                    });
+                }
+            });
+
+            if (results.length > 0) {
+                searchResults.innerHTML = results.map(result => 
+                    `<div class="search-result" onclick="navigateToSection('${result.section}')">
+                        <strong>${result.title}</strong>
+                        <p>${result.context.replace(new RegExp(searchTerm, 'gi'), '<mark>$&</mark>')}</p>
+                    </div>`
+                ).join('');
+                searchResults.style.display = 'block';
+            } else {
+                searchResults.innerHTML = '<div class="search-result">No results found</div>';
+                searchResults.style.display = 'block';
+            }
+        });
+
+        // Navigate to section
+        function navigateToSection(sectionId) {
+            const navItem = document.querySelector(`[data-section="${sectionId}"]`);
+            if (navItem) {
+                navItem.click();
+                document.getElementById('searchResults').style.display = 'none';
+                document.getElementById('searchInput').value = '';
+            }
+        }
+
+        // Table filtering
+        function filterTable(input, tableId) {
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById(tableId);
+            const rows = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                const cells = row.getElementsByTagName('td');
+                let found = false;
+
+                for (let j = 0; j < cells.length; j++) {
+                    if (cells[j].textContent.toLowerCase().includes(filter)) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                row.style.display = found ? '' : 'none';
+            }
+        }
+
+        // Copy code functionality
+        function copyCode(button) {
+            const codeBlock = button.closest('.code-container').querySelector('pre code');
+            const textArea = document.createElement('textarea');
+            textArea.value = codeBlock.textContent;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            button.textContent = 'Copied!';
+            setTimeout(() => {
+                button.textContent = 'Copy';
+            }, 2000);
+        }
+
+        // Smooth scroll for better UX
+        document.addEventListener('click', function(e) {
+            if (e.target.matches('[href^="#"]')) {
+                e.preventDefault();
+                const target = document.querySelector(e.target.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            }
+        });
+
+        // Add loading states for dynamic content
+        function showLoading(element) {
+            element.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+        }
+
+        // Progress bar animation
+        function animateProgressBars() {
+            const progressBars = document.querySelectorAll('.progress-fill');
+            progressBars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 500);
+            });
+        }
+
+        // Animate progress bars when section becomes visible
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateProgressBars();
+                }
+            });
+        });
+
+        document.querySelectorAll('.progress-bar').forEach(bar => {
+            observer.observe(bar);
+        });
+    </script>
+</body>
+</html>
